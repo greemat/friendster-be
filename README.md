@@ -1,6 +1,6 @@
 # NodeJSBackend
 
-A simple Express.js backend for securely serving Firebase configuration (e.g. API keys) to your frontend application.
+A simple Express.js backend for securely serving Firebase configuration (e.g. API keys) to a frontend application.
 
 ## 📁 Project Structure
 
@@ -18,12 +18,18 @@ nodejsbackend/
 
 ## 🚀 Getting Started
 
-1. Install Dependencies
+1. Clone the repo:
+
+   ```bash
+   git clone https://github.com/yourusername/nodejsbackend.git
+   cd nodejsbackend
+
+2. Install Dependencies
 
    ```bash
    npm install
 
-2. Run the Server
+3. Run the Server
 
    For development with automatic reloads:
 
@@ -35,7 +41,7 @@ nodejsbackend/
    npm run build
    npm start
 
-3. API Endpoints
+4. API Endpoints
 
    GET /api/getApiKey
    Returns the Firebase API key stored in your .env.
