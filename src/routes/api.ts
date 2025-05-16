@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { db, auth } from '../firebaseAdmin';
+import { db, auth } from '../firebase/firebaseAdmin';
 import dotenv from 'dotenv';
 
 dotenv.config();
