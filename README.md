@@ -18,22 +18,25 @@ nodejsbackend/
 
 ## 🚀 Getting Started
 
-### 1. Install Dependencies
+1. Install Dependencies
 
    ```bash
    npm install
 
-### 2. Run the Server
+2. Run the Server
 
-   #For development with automatic reloads:
+   For development with automatic reloads:
+
    ```bash
    npm run dev
 
-   #To compile and run the production server:
+   To compile and run the production server:
+
    npm run build
    npm start
 
-### 3. API Endpoints
+3. API Endpoints
+
    GET /api/getApiKey
    Returns the Firebase API key stored in your .env.
 
@@ -51,7 +54,7 @@ nodejsbackend/
 | `npm start`     | Runs compiled production build     |
 
 
-##SECURITY NOTES
+## SECURITY NOTES
 Do not expose any sensitive credentials or write-access keys through this API.
 
 Consider additional authentication (e.g. IP filtering or tokens) before deploying to production.
