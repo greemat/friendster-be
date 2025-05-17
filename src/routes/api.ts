@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { getApiKey } from '../controllers/submissionController';
+import { getFirebaseConfig } from '../controllers/submissionController';
 
 const router = Router();
 
-router.get('/getApiKey', getApiKey);
+router.get('/getFirebaseConfig', getFirebaseConfig);
 
 export default router;
+
