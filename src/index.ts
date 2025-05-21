@@ -1,16 +1,17 @@
-//index.ts
-import express from 'express';
-import dotenv from 'dotenv';
-import apiRoutes from './routes/api'; // ← this is your router
+require('dotenv').config(); // Load .env variables before anything else
+import './utils/firebaseAdmin'; // Ensure Firebase Admin initializes here
 
-dotenv.config();
+import express from 'express';
+import firebaseConfigRoutes from './routes/firebaseConfigRoutes';
+import authRoutes from './routes/authRoutes';
+import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
 app.use(express.json());
-app.use('/api', apiRoutes); // ✅ Pass router, not handler
+app.use('/auth', authRoutes);
+app.use('/api', firebaseConfigRoutes);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
