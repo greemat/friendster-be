@@ -1,4 +1,5 @@
-//src/routes/submitForm.ts
+// Handles POST requests to /api/submitForm, processes form data and image file uploads, validates inputs, and stores them in Firestore and Firebase Storage.
+
 import express from 'express';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';

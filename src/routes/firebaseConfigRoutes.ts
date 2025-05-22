@@ -1,3 +1,5 @@
+// Route for exposing non-sensitive Firebase config data to the frontend.
+
 import express, { Request, Response } from 'express';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';

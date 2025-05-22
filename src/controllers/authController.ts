@@ -1,3 +1,5 @@
+// Controller for handling authentication routes: login, token refresh, and user profile retrieval.
+
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';

@@ -1,3 +1,5 @@
+// Test for Firebase Uploads, can be used as entry point to bypass main app.
+
 require('dotenv').config(); // ✅ load env vars
 import * as fs from 'fs';
 import * as path from 'path';

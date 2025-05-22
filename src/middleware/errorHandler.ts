@@ -1,3 +1,5 @@
+// Centralized error handler for Express to format and return error responses.
+
 import { Request, Response, NextFunction } from 'express';
 
 interface ErrorWithStatus extends Error {

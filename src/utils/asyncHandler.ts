@@ -1,3 +1,5 @@
+// Utility to wrap async functions in Express routes for cleaner error handling.
+
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
 
 export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>): RequestHandler => {

@@ -1,5 +1,7 @@
-require('dotenv').config(); // Load .env variables before anything else
-import './utils/firebaseAdmin'; // Ensure Firebase Admin initializes here
+// Entry point for the server. Sets up the Express app, middleware, connects to Firebase Admin SDK, and starts listening on the configured port.
+
+require('dotenv').config(); // Load .env variables
+import './utils/firebaseAdmin'; // Initialize Firebase Admin
 
 import express from 'express';
 import firebaseConfigRoutes from './routes/firebaseConfigRoutes';

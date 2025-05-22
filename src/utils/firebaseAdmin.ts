@@ -1,4 +1,5 @@
-//firebaseAdmin.ts
+// Initializes Firebase Admin SDK with service account credentials.
+
 import * as admin from 'firebase-admin';
 import serviceAccount from '../config/serviceAccountKey.json';
 

@@ -1,3 +1,5 @@
+// Verifies JWTs from incoming requests. Adds the decoded user info to req.user if valid, otherwise returns a 401 response.
+
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 

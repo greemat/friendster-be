@@ -1,3 +1,5 @@
+// Initializes and exports the Firebase Admin SDK instance using service account credentials. Ensures it runs as a singleton to avoid reinitialization in serverless contexts.
+
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';

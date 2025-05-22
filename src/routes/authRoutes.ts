@@ -1,3 +1,5 @@
+// Define authentication routes; signup, login, refresh-token, logout, and profile.
+
 import express from 'express';
 import * as authController from '../controllers/authController';
 
