@@ -1,10 +1,10 @@
-# NodeJSBackend
+# friendster-be
 
 A simple Express.js backend for securely serving Firebase configuration (e.g. API keys) to a frontend application.
 
 ## 📁 Project Structure
 
-nodejsbackend/
+friendster-be/
 ├── src/
 │ ├── routes/
 │ │ └── api.ts # API route handler for /api/getApiKey
@@ -21,8 +21,8 @@ nodejsbackend/
 1. Clone the repo:
 
    ```bash
-   git clone https://github.com/yourusername/nodejsbackend.git
-   cd nodejsbackend
+   git clone https://github.com/yourusername/friendster-be.git
+   cd friendster-be
 
 2. Install Dependencies
 
