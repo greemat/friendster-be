@@ -1,5 +1,3 @@
-// Controller for handling authentication routes: login, token refresh, and user profile retrieval.
-
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -16,7 +14,7 @@ const signToken = (payload: object, expiresIn: string, secretEnvVar: string): st
   if (!secret) {
     throw new Error(`${secretEnvVar} is not defined`);
   }
-  return (jwt.sign as any)(payload, secret, { expiresIn });
+  return jwt.sign(payload, secret, { expiresIn } as jwt.SignOptions);
 };
 
 export const signup = asyncHandler(async (req: Request, res: Response) => {
@@ -30,25 +28,23 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
     const userRecord = await admin.auth().createUser({ email, password });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await db.collection('authUsers').doc(userRecord.uid).set({ hashedPassword });
+    await db.collection('authUsers').doc(userRecord.uid).set({
+      hashedPassword,
+      profileImageUrl: null, // initialized
+    });
 
-    // Create access and refresh tokens
     const accessToken = signToken({ uid: userRecord.uid, email }, '15m', 'JWT_SECRET');
     const refreshToken = signToken({ uid: userRecord.uid, email }, '7d', 'JWT_REFRESH_SECRET');
 
-    // Store refresh token in Firestore
     await db.collection('refreshTokens').doc(userRecord.uid).set({ token: refreshToken });
 
     res.status(201).json({ token: accessToken, refreshToken });
-    return;
   } catch (err: any) {
     if (err.code === 'auth/email-already-exists') {
       res.status(409).json({ error: 'Email already registered' });
-      return;
     } else {
       console.error(err);
       res.status(500).json({ error: err.message || 'Internal server error' });
-      return;
     }
   }
 });
@@ -79,15 +75,16 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  // Create access and refresh tokens
   const accessToken = signToken({ uid: userRecord.uid, email }, '15m', 'JWT_SECRET');
   const refreshToken = signToken({ uid: userRecord.uid, email }, '7d', 'JWT_REFRESH_SECRET');
 
-  // Store refresh token in Firestore
   await db.collection('refreshTokens').doc(userRecord.uid).set({ token: refreshToken });
 
-  res.status(200).json({ token: accessToken, refreshToken });
-  return;
+  res.status(200).json({
+    token: accessToken,
+    refreshToken,
+    profileImageUrl: userData?.profileImageUrl || null,
+  });
 });
 
 export const refreshToken = asyncHandler(async (req: Request, res: Response) => {
@@ -98,9 +95,7 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
   }
 
   const refreshSecret = process.env.JWT_REFRESH_SECRET;
-  if (!refreshSecret) {
-    throw new Error('JWT_REFRESH_SECRET is not defined');
-  }
+  if (!refreshSecret) throw new Error('JWT_REFRESH_SECRET is not defined');
 
   let decoded: any;
   try {
@@ -111,26 +106,19 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
   }
 
   const storedTokenDoc = await db.collection('refreshTokens').doc(decoded.uid).get();
-  if (!storedTokenDoc.exists) {
-    res.status(401).json({ error: 'Refresh token revoked' });
-    return;
-  }
   const storedToken = storedTokenDoc.data()?.token;
-  if (storedToken !== refreshToken) {
-    res.status(401).json({ error: 'Refresh token mismatch' });
+
+  if (!storedTokenDoc.exists || storedToken !== refreshToken) {
+    res.status(401).json({ error: 'Refresh token revoked or mismatched' });
     return;
   }
 
-  // Issue new access token
-  const accessToken = signToken({ uid: decoded.uid, email: decoded.email }, '15m', 'JWT_SECRET');
+  const newAccessToken = signToken({ uid: decoded.uid, email: decoded.email }, '15m', 'JWT_SECRET');
 
-  res.status(200).json({ token: accessToken, refreshToken });
-
-  return;
+  res.status(200).json({ token: newAccessToken, refreshToken });
 });
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
-  // You can pass refresh token in body or auth header
   const { refreshToken } = req.body;
   if (!refreshToken) {
     res.status(400).json({ error: 'Refresh token required' });
@@ -138,9 +126,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const refreshSecret = process.env.JWT_REFRESH_SECRET;
-  if (!refreshSecret) {
-    throw new Error('JWT_REFRESH_SECRET is not defined');
-  }
+  if (!refreshSecret) throw new Error('JWT_REFRESH_SECRET is not defined');
 
   let decoded: any;
   try {
@@ -150,11 +136,9 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  // Delete refresh token from Firestore (revoke it)
   await db.collection('refreshTokens').doc(decoded.uid).delete();
 
   res.status(200).json({ message: 'Logged out successfully' });
-  return;
 });
 
 export const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
@@ -165,10 +149,11 @@ export const getUserProfile = asyncHandler(async (req: Request, res: Response) =
   }
 
   const token = authHeader.split(' ')[1];
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET is not defined');
+
   let decoded: any;
   try {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) throw new Error('JWT_SECRET not set');
     decoded = jwt.verify(token, secret);
   } catch {
     res.status(401).json({ error: 'Invalid token' });
@@ -176,6 +161,12 @@ export const getUserProfile = asyncHandler(async (req: Request, res: Response) =
   }
 
   const user = await admin.auth().getUser(decoded.uid);
-  res.status(200).json({ email: user.email, uid: user.uid });
-  return;
+  const userDoc = await db.collection('authUsers').doc(decoded.uid).get();
+  const userData = userDoc.data();
+
+  res.status(200).json({
+    email: user.email,
+    uid: user.uid,
+    profileImageUrl: userData?.profileImageUrl || null,
+  });
 });

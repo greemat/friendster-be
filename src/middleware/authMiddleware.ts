@@ -1,37 +1,43 @@
-// Verifies JWTs from incoming requests. Adds the decoded user info to req.user if valid, otherwise returns a 401 response.
-
+// middleware/authMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-interface DecodedToken {
-  uid: string;
-  email: string;
-  iat: number;
-  exp: number;
+
+// Extend the Request type to include the decoded user info
+interface AuthenticatedRequest extends Request {
+  user?: {
+    uid: string;
+    email: string;
+  };
 }
 
-export const authenticateToken = async (
-  req: Request,
+export const authMiddleware = (
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-): Promise<void> => {
+): void => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Unauthorized: no token' });
+    return;
+  }
+
+  const token = authHeader.split(' ')[1];
+  const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
+  
+  
   try {
-    const authHeader = req.headers.authorization;
+    const decoded = jwt.verify(token, JWT_SECRET) as { uid: string; email: string };
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ error: 'No token provided or malformed header' });
-      return;
-    }
-
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
-
-    // Optionally: fetch user info or permissions here
-    (req as any).user = decoded;
-
+    // Attach the decoded user info to the request
+    req.user = {
+      uid: decoded.uid,
+      email: decoded.email,
+    };
     next();
   } catch (err) {
-    console.error('Token verification error:', err);
-    res.status(401).json({ error: 'Invalid or expired token' });
+    console.error('JWT verification error:', err);
+    res.status(401).json({ error: 'Unauthorized: invalid token' });
   }
 };
